@@ -1,0 +1,48 @@
+{
+  "author": {
+    "name": "László Szakmári www.pizzaprogram.hu"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "i2c-bus": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=12",
+    "node-red": ">1"
+  },
+  "deprecated": false,
+  "description": "Node-Red node for multiple MCP23017 chips (each 16 input or output) + PCF8574 (8 I/O). The I2C Bus number can be specified too.",
+  "keywords": [
+    "multiple",
+    "i2c",
+    "bus",
+    "io",
+    "input",
+    "output",
+    "aio",
+    "mcp23017",
+    "pcf8574",
+    "channel"
+  ],
+  "license": "MIT",
+  "main": "mcp-pcf-aio",
+  "name": "mcp-pcf-aio",
+  "node-red": {
+    "nodes": {
+      "mcp-pcf-aio": "mcp-pcf-aio.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pizzaprogram/mcp23017-pcf8574-aio"
+  },
+  "scripts": {
+    "node-red": "node /usr/lib/node_modules/node-red/red.js",
+    "node-red2": "node --inspect /usr/lib/node_modules/node-red/red.js",
+    
+    "inspect": "node --inspect /usr/lib/node_modules/node-red/red.js --userDir /home/pi/.node-red/node_modules/mcp-pcf-aio",
+    "start": "node node_modules/node-red/red.js -v -u . -s settings.js",
+    "debug": "node --nolazy --inspect-brk=9229 node_modules/node-red/red.js -v -u . -s settings.js"
+  },
+"version": "2.1.0"
+}
