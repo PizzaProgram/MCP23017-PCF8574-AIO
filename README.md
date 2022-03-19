@@ -1,6 +1,4 @@
 # A Node-Red node for the MCP23017 & PCF8574 chips  
-  
-# Warning! Inputs are still under development and having some bugs. You may help to fix them too...
 
 - About Node-Red [link...](https://nodered.org/)  
 - [Link for the MCP chip itself](https://www.microchip.com/wwwproducts/en/MCP23017)  
