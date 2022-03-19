@@ -1,5 +1,7 @@
 # A Node-Red node for the MCP23017 & PCF8574 chips  
   
+# Warning! Inputs are still under development and having some bugs. You may help to fix them too...
+
 - About Node-Red [link...](https://nodered.org/)  
 - [Link for the MCP chip itself](https://www.microchip.com/wwwproducts/en/MCP23017)  
 - [Chip specs. PDF](https://ww1.microchip.com/downloads/en/DeviceDoc/20001952C.pdf)  
@@ -59,16 +61,28 @@ Requires 'i2c-bus' module. [link...](https://github.com/fivdi/i2c-bus)
 # To Do
 
 1. Don't even allow already selected bits to be selected again (not just error reporting about)
-2. When a node is deleted or disabled - remove from ids (array in chip)
+2. When a node is deleted or disabled - remove from ids (array in chip) --- half done at 2022-03-19 version
 3. Block RW operations happening at the same time... (rework everything to Async / await and atomic flags)
-4. Analize further how interrupts are dealt with in C code and write it in JavaScript. 
- Example in C language [here...](https://www.arduinolibraries.info/libraries/mcp23017)
+4. Analize further how interrupts are dealt with in C code and write it in s/mcp23017)
+
+
+# Known problem:
+
+After disconnected of cable or USB-I2C adapter the readouts can not properly restore unless restarting the whole flow
 
 
 # Credit
 Thanks to Mike Wilson for the original v0.1 node: [MCP23017chip](https://flows.nodered.org/node/node-red-contrib-mcp23017chip)
 
 
+# Change Log 2022-03-19 (Y-M-D)  Version: 2.3.0.20220319
+by László Szakmári (www.pizzaprogram.hu)
+
+- FIRST OFFICIAL RELEASE
+
+- Enhanced html help of the node
+
+- fixed bugs (like: partial Deploy did not clear prev. instances from context)
 
 
 # Change Log 2022-03-03 (Y-M-D)  Version: 2.3.0.20220303
@@ -87,6 +101,8 @@ by László Szakmári (www.pizzaprogram.hu)
 - Fixed crashing of Node-red if chip or I2C bus was suddenly removed from system.
 
 - Inject (Interrupt) trigger adds extra values to msg. []
+
+- Github upload. (PFC false-named one got deleted)
 
 
 # Change Log 2021-01-11 (Y-M-D) 
