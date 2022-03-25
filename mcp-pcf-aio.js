@@ -369,7 +369,7 @@ module.exports = function(RED) {
 			if (log2consol) console.log("  MCP/PCF startChipTimer = " + _newInterval +" ms");
 			
 			if ((_newInterval == undefined) || (_newInterval == 0)) {
-				console.log("  MCP/PCF  Timer interval is UNDEFINED or 0 ! Exiting.");
+				console.log("  MCP/PCF  Timer interval is UNDEFINED or 0 ! Timer will not be started. Exiting.");
 				return null;
 			}
 
@@ -769,7 +769,11 @@ module.exports = function(RED) {
 				_aBus.closeSync();
 				_aBus = null;
 				_parCh.globalState = 1; // working
-				showState(_callerNode, _newState, 1);
+
+				let n = _callerNode;
+				if ( n.bitNum != _bitNum ) 	n = _parCh.ids[_bitNum]; // if the function was called with a "direct-msg-control-method" change the right node if exists
+				if (n != null) 	showState(n, _newState, 1);
+				
 				if (log2consol) console.log(":-)  MCP/PCF setOutput finished. Closing bus. ip1="+ ip16 );
 				_parCh.RW_finish();
 				return true;

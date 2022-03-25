@@ -86,7 +86,7 @@ Thanks to Mike Wilson for the original v0.1 node: [MCP23017chip](https://flows.n
 by László Szakmári (www.pizzaprogram.hu)
 
 - you can set 1-1 node only pro 0-7 or 8-15 and control via `msg.Pin=` and `msg.State=` if `msg.Payload=-1`  
-  (NOT finished yet, because it changes the On-Off state visually of the Node while it's not that node changed.)
+
 - fixed `consol.warning` bug if Timer set = 0ms.  
 
 
