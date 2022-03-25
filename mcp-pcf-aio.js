@@ -2,8 +2,9 @@
 
 debugger
 
-const { normalize } = require("path");
+// const { normalize } = require("path");
 const { abort } = require("process");
+const { isNumberObject } = require("util/types");
 
 // Read more: 
 
@@ -292,6 +293,15 @@ module.exports = function(RED) {
 
 					_processState = 2;
 
+					// Turn On ALL pins at start
+					if ((_parCh.startAllHIGH == true) && (_callerNode.lastState = -2)){
+						if (log2consol) console.log("  MCP Now Setting ALL pins to HIGH. A+B = 1111111111111111");
+						aBus.writeByteSync(_parCh.addr, BNK1_OLAT_A, 0xFF);	//Set output A to 11111111
+						aBus.writeByteSync(_parCh.addr, BNK1_OLAT_B, 0xFF);	//Set output B to 11111111
+						_parCh.AllStates 	= 0xFFFF;
+						_parCh.startAllHIGH = false; // 1x running is enough. Turn it off now.
+					}
+
 					if (_parCh.AllStates = -1) {
 						let ip1 = aBus.readByteSync(_parCh.addr, BNK1_GPIO_A);
 						let ip2 = aBus.readByteSync(_parCh.addr, BNK1_GPIO_B);
@@ -322,14 +332,6 @@ module.exports = function(RED) {
 	//					else				{aBus.writeByteSync(_parCh.addr, IPOL_B,    (_parCh.inverts  >> 8) & 0xFF);} //update input invert B
 						if (_bitNum < 8)	{aBus.writeByteSync(_parCh.addr, BNK1_GPINTEN_A,  _parCh.isInputs       & 0xFF);} //update interrupts A
 						else				{aBus.writeByteSync(_parCh.addr, BNK1_GPINTEN_B, (_parCh.isInputs >> 8) & 0xFF);} //update interrupts B
-					}
-
-					if ((_parCh.startAllHIGH == true) && (_callerNode.lastState = -2)){
-						if (log2consol) console.log("  MCP Now Setting ALL pins to HIGH. A+B = 1111111111111111");
-						aBus.writeByteSync(_parCh.addr, BNK1_OLAT_A, 0xFF);	//Set output A to 11111111
-						aBus.writeByteSync(_parCh.addr, BNK1_OLAT_B, 0xFF);	//Set output B to 11111111
-						_parCh.AllStates 	= 0xFFFF;
-						_parCh.startAllHIGH = false; // 1x running is enough. Turn it off now.
 					}
 
 				} // MCP chip
@@ -367,7 +369,7 @@ module.exports = function(RED) {
 			if (log2consol) console.log("  MCP/PCF startChipTimer = " + _newInterval +" ms");
 			
 			if ((_newInterval == undefined) || (_newInterval == 0)) {
-				console.warning("  MCP/PCF  Timer interval is UNDEFINED or 0 ! Exiting.");
+				console.log("  MCP/PCF  Timer interval is UNDEFINED or 0 ! Exiting.");
 				return null;
 			}
 
@@ -579,9 +581,9 @@ module.exports = function(RED) {
 				const nullmsg = (_msg == null);
 				if (nullmsg) _msg = {};
 				const _stateINV = node.invert ? !_state : _state;
-				if (  _stateINV) _msg.payload = (node.onMsg ) ? node.onMsg  : true;
-				if (! _stateINV) _msg.payload = (node.offMsg) ? node.offMsg : false; 
-				if (nullmsg) {node.send( _msg )} else return _msg; // if called from "read_1x" input >> do not send yet
+				if (  _stateINV && node.onMsg ) _msg.payload = true;
+				if (! _stateINV && node.offMsg) _msg.payload = false; 
+				if (nullmsg && (_msg.payload != null)) {node.send( _msg )} else return _msg; // if called from "read_1x" input >> do not send yet
 			}
 		}
 
@@ -787,14 +789,30 @@ module.exports = function(RED) {
 
 
 		this.on('input', function(msg) {
+			let _parCh = node.parentChip;
 			if (!node.initOK) {
 				if (log2consol) console.log("  MCP/PCF Out > New msg recieved, but Node not initialized yet. ID=" + node.id + "  bitNum=" + node.bitNum);
 				node.initOK = _parCh.initializeBit(node.bitNum, false, false, this.id);
 				if (!node.initOK) {return null;}
 			}
 
-			let _parCh = node.parentChip;
 			if (! _parCh) { consol.error("  MCP PCF Out >> input msg recieved, but ParentChip of Node is null!"); return null }
+
+			// ***  SET only 1 pin via msg JSON  *** //
+			if ( msg.payload == -1 ) {
+				if (log2consol) console.log("  MCP/PCF > Set direct pin Chip Addr=" + _parCh.addr);
+				const _Pin1 = parseInt( msg.Pin );
+				if ((_Pin1 == NaN) || (_Pin1 < 0) || (_Pin1 > 15) ) {
+					node.error("msg.Pin not properly set for direct control of a MCP or PCF chip. It must be a nuber between 0-7 or 8-15");
+					return false;
+				}
+				if (msg.State == null) {
+					node.error("msg.State not set for direct control of a MCP or PCF chip.");
+					return false;
+				}
+				const _OnOff1 = (msg.State == true) || (msg.State == 1); //safe boolean conversion
+				node.setOutput(_Pin1, _OnOff1, node);
+			} else
 
 			if ( msg.payload == "All0" ) {
 				if (log2consol) console.log("  MCP/PCF > Set ALL pins to 0000...  Chip Addr=" + _parCh.addr);
@@ -804,6 +822,7 @@ module.exports = function(RED) {
 				if (log2consol) console.log("  MCP/PCF > Set ALL pins to 1111...  Chip Addr=" + _parCh.addr);
 				node.setOutput(-1, true, node);
 			} else
+			
 			{
 				//console.log("OUT: NEW input... payl=" + msg.payload);
 				let _pinOn = (msg.payload == true) || (msg.payload == 1); //safe boolean conversion
@@ -828,6 +847,8 @@ module.exports = function(RED) {
 			}
 			catch (err) { console.error( "  MCP/PCF Error while closing an In-Node: " + err ); };
 		});
+
+
 	}
 	
 	RED.nodes.registerType("MCP PCF Out", mcp_pcf_outNode);

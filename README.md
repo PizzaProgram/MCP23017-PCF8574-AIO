@@ -1,5 +1,5 @@
 # A Node-Red node for the MCP23017 & PCF8574 chips  
-
+  
 - About Node-Red [link...](https://nodered.org/)  
 - [Link for the MCP chip itself](https://www.microchip.com/wwwproducts/en/MCP23017)  
 - [Chip specs. PDF](https://ww1.microchip.com/downloads/en/DeviceDoc/20001952C.pdf)  
@@ -19,13 +19,16 @@
 It uses the config node "mcp_pcf_chip" for all reading and writing on i2c bus  
 [More about I2C...](https://en.wikipedia.org/wiki/I%C2%B2C)  
   
-- Each pin (16 in total) can be individually selected to be an input or output  
-- You need to place as many Nodes to your flows as many pins you use.  
-- 4 states of a node: `On=green`   `Off=grey`   `Uninitialised=yellow`   `Error=red`  
+- Each pin (8 or 16 in total) can be individually selected to be an input or output  
+- You can place as many Nodes to your flows as many pins you use, or  
+- you can also set 1-1 node only pro 0-7 or 8-15 and control via `msg.Pin` and `msg.State` if `msg.Payload=-1`  
+- 4 states are showed of a node: `On=green`   `Off=grey`   `Uninitialised=yellow`   `Error=red`  
   
 Requires 'i2c-bus' module. [link...](https://github.com/fivdi/i2c-bus)  
 ( _It gets automatically installed, except if you want to use it directly from function nodes._ )  
   
+<img src="Node-Red-Nodes-MCP-PCF-AiO-example1.jpg" width="50%" height="50%">
+
 # Inputs  
   
 **WARNING:** input interrupts part of this component is experimental.  
@@ -35,17 +38,19 @@ Requires 'i2c-bus' module. [link...](https://github.com/fivdi/i2c-bus)
   
 # Config  
   
-- The Chip can be configured with "I2C bus number" + "Chip Address" globally.  
+- Each node has a global Main-Chip, that can be configured with "I2C bus number" + "Chip Address".
+(The PCF8574(A) chips are showed currently with an Address multiplied by 2. Like: 0x21 * 2 = 0x42 )  
   
-- The interval is used to determine how frequently all inputs are polled. ( _Reads all 8+8 ports from bank A+B._ )  
+- Interval: is used to determine how frequently all inputs are polled. ( _Reads all 8+8 ports from bank A+B._ )  
  ! Should be minimum 20ms, because a read process of 16 pins takes 12-14ms on a Raspberry Pi 4.  
   
-- The bit number is 0 to 15 reflecting the pin  
+- Bit: is a number from 0 to 15 reflecting the pin (0-7 at FCP8574 chips)
+ If "All0" or "All1" is recieved, the bit becames: -1 in logs.  
   
-- Pull Up engages the low power pull up resistor. More: https://en.wikipedia.org/wiki/Pull-up_resistor  
+- Pull Up: engages the low power pull up resistor. More: https://en.wikipedia.org/wiki/Pull-up_resistor  
  (Inputs only.)  
   
-- Debounce is a timer where the state must remain at the new level for the specified time (millisec)  
+- Debounce: is a timer where the state must remain at the new level for the specified time (millisec)  
  (Inputs only.)  
  ( _It will filter out too short changes, like sparkles._ )  
   
@@ -54,6 +59,14 @@ Requires 'i2c-bus' module. [link...](https://github.com/fivdi/i2c-bus)
  ( _For example some relay boards are "closing = pulling" if they get GND instead of 5V on their pins,  
  so they need to be negated with resistors. In those cases the chip must get 0x00 to "turn on"._ )  
 
+- Start All Outputs High: when node-red is started and first chip gets inicialized, it will send a 0xFFFF signal to all pins, so they
+
+# Known problems:
+
+1. After disconnected of cable or USB-I2C adapter the readouts can not properly restore unless restarting the whole flow.
+2. Multiple Main-chip-setup-nodes can be set to same Address, causing conflicts. (No pre-error or pre-warning happens.)
+3. The PCF8574(A) chips are showed currently with an Address multiplied by 2 like: 0x21 * 2 = 0x42  
+4. It changes the On-Off state visually of the Node while it's not that node changed when using direct-msg-control  
 
 
 # To Do
@@ -62,15 +75,25 @@ Requires 'i2c-bus' module. [link...](https://github.com/fivdi/i2c-bus)
 2. When a node is deleted or disabled - remove from ids (array in chip) --- half done at 2022-03-19 version
 3. Block RW operations happening at the same time... (rework everything to Async / await and atomic flags)
 4. Analize further how interrupts are dealt with in C code and write it in s/mcp23017)
-
-
-# Known problem:
-
-After disconnected of cable or USB-I2C adapter the readouts can not properly restore unless restarting the whole flow
+5. Don't allow to create multiple main chips with the same address (MCP + PCF can be on the same address accidentally)
 
 
 # Credit
 Thanks to Mike Wilson for the original v0.1 node: [MCP23017chip](https://flows.nodered.org/node/node-red-contrib-mcp23017chip)
+
+
+# Change Log 2022-03-22 (Y-M-D)  Version: 2.3.2.20220322
+by László Szakmári (www.pizzaprogram.hu)
+
+- you can set 1-1 node only pro 0-7 or 8-15 and control via `msg.Pin=` and `msg.State=` if `msg.Payload=-1`  
+  (NOT finished yet, because it changes the On-Off state visually of the Node while it's not that node changed.)
+- fixed `consol.warning` bug if Timer set = 0ms.  
+
+
+# Change Log 2022-03-21 (Y-M-D)  Version: 2.3.1.20220321
+by László Szakmári (www.pizzaprogram.hu)
+
+- Fixed bug: on input change payload was always "true". 
 
 
 # Change Log 2022-03-19 (Y-M-D)  Version: 2.3.0.20220319
@@ -98,9 +121,9 @@ by László Szakmári (www.pizzaprogram.hu)
 
 - Fixed crashing of Node-red if chip or I2C bus was suddenly removed from system.
 
-- Inject (Interrupt) trigger adds extra values to msg. []
+- Inject (Interrupt) trigger adds extra values to msg. [] ... see help
 
-- Github upload. (PFC false-named one got deleted)
+- New Github upload. (PFC false-named one got deleted)
 
 
 # Change Log 2021-01-11 (Y-M-D) 
