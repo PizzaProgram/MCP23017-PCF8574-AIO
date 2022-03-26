@@ -11,7 +11,13 @@
 			startAllHIGH: { value: false, required: true } // initialising the chip with all pins at HIGH state.
 		},
 		label: function () {
-			return "i2c bus: " + this.busNum + " /addr: " + this.addr;
+			const _txt = "I2C-bus=" + this.busNum + " , Addr=";
+			const _ad  = parseInt(this.addr  , 16);
+			if (_ad >= 112 ) {return "FCP8574A: " + _txt + "0x" + (_ad/2).toString(16);} //"0x70"
+			else 
+			if (_ad >=  64 ) {return "FCP8574: "  + _txt + "0x" + (_ad/2).toString(16);} //"0x40"
+			else
+							 {return "MCP23017: " + _txt + this.addr;}
 		},
 		align: 'center'
 	});

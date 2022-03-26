@@ -7,6 +7,7 @@
 - [Chip specs. PDF](https://www.ti.com/lit/gpn/pcf8574)  
 - [Node-RED node](https://flows.nodered.org/node/mcp23017-pcf8574-aio)  
 - [Github source](https://github.com/PizzaProgram/mcp23017-pcf8574-aio)  
+- [Forum discussion](https://discourse.nodered.org/t/new-mcp23017-pcf8574-all-in-one-node)
   
 # Code Language:  
   
@@ -21,13 +22,13 @@ It uses the config node "mcp_pcf_chip" for all reading and writing on i2c bus
   
 - Each pin (8 or 16 in total) can be individually selected to be an input or output  
 - You can place as many Nodes to your flows as many pins you use, or  
-- you can also set 1-1 node only pro 0-7 or 8-15 and control via `msg.Pin` and `msg.State` if `msg.Payload=-1`  
+- you can also set 1-1 node only pro 0-7 or 8-15 and control via `msg.pin` and `msg.state` if `msg.payload=-1`  
 - 4 states are showed of a node: `On=green`   `Off=grey`   `Uninitialised=yellow`   `Error=red`  
   
 Requires 'i2c-bus' module. [link...](https://github.com/fivdi/i2c-bus)  
 ( _It gets automatically installed, except if you want to use it directly from function nodes._ )  
   
-<img src="Node-Red-Nodes-MCP-PCF-AiO-example1.jpg" width="50%" height="50%">
+<img src="Node-Red-Nodes-MCP-PCF-AiO-example1.jpg" width="100%" height="100%">
 
 # Inputs  
   
@@ -65,8 +66,10 @@ Requires 'i2c-bus' module. [link...](https://github.com/fivdi/i2c-bus)
 
 1. After disconnected of cable or USB-I2C adapter the readouts can not properly restore unless restarting the whole flow.
 2. Multiple Main-chip-setup-nodes can be set to same Address, causing conflicts. (No pre-error or pre-warning happens.)
-3. The PCF8574(A) chips are showed currently with an Address multiplied by 2 like: 0x21 * 2 = 0x42  
+3. -- fixed 2022-03-26
 4. It changes the On-Off state visually of the Node while it's not that node changed when using direct-msg-control  
+5. Sending "All0" or "All1" to an MCP node turns on only 0-7 pins, if Bit of Nodes are only set to 0-7. 
+  Solution: Set Bit of the node at setup to 8-15 to turn ALL!
 
 
 # To Do
@@ -80,6 +83,20 @@ Requires 'i2c-bus' module. [link...](https://github.com/fivdi/i2c-bus)
 
 # Credit
 Thanks to Mike Wilson for the original v0.1 node: [MCP23017chip](https://flows.nodered.org/node/node-red-contrib-mcp23017chip)
+
+
+# Change Log 2022-03-26 (Y-M-D)  Version: 2.3.4.20220326
+by László Szakmári (www.pizzaprogram.hu)
+
+ - PCF chips show now correct Address -at Main-Chip setup. Fixed.
+
+ - Fixed "interval too short" auto-increase happaning if "interrupt-triggered" read occures
+
+
+# Change Log 2022-03-25 (Y-M-D)  Version: 2.3.3.20220325
+by László Szakmári (www.pizzaprogram.hu)
+
+ - Changed `msg.pin` and `msg.state` to lower case.
 
 
 # Change Log 2022-03-22 (Y-M-D)  Version: 2.3.2.20220322

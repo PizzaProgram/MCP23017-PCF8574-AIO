@@ -3,8 +3,8 @@
 debugger
 
 // const { normalize } = require("path");
-const { abort } = require("process");
-const { isNumberObject } = require("util/types");
+// const { abort } = require("process");
+// const { isNumberObject } = require("util/types");
 
 // Read more: 
 
@@ -497,10 +497,12 @@ module.exports = function(RED) {
 			mainChipNode.RW_finish();
 			mainChipNode.lastTimeRed = performance.now(); //new Date().getTime();
 			mainChipNode.readLength  = mainChipNode.lastTimeRed - _readTime;
-			if (mainChipNode.interval < mainChipNode.readLength) {  // the time the reading took was too long. Increased the interval to double of that (ms).
-				mainChipNode.warning("  MCP/PCF Interval (" + mainChipNode.interval + "ms) is too short for input. Setting new time = " + (mainChipNode.readLength * 2).toString);
-				mainChipNode.startChipTimer( mainChipNode.readLength * 2);
-			} 
+			if (! read1x) {
+				if (mainChipNode.interval < mainChipNode.readLength) {  // the time the reading took was too long. Increased the interval to double of that (ms).		
+					mainChipNode.warning("  MCP/PCF Interval (" + mainChipNode.interval + "ms) is too short for input. Setting new time = " + (mainChipNode.readLength * 2).toString);
+					mainChipNode.startChipTimer( mainChipNode.readLength * 2);
+				} 
+			}
 
 			return true;
 		}
@@ -805,16 +807,16 @@ module.exports = function(RED) {
 			// ***  SET only 1 pin via msg JSON  *** //
 			if ( msg.payload == -1 ) {
 				if (log2consol) console.log("  MCP/PCF > Set direct pin Chip Addr=" + _parCh.addr);
-				const _Pin1 = parseInt( msg.Pin );
+				const _Pin1 = parseInt( msg.pin );
 				if ((_Pin1 == NaN) || (_Pin1 < 0) || (_Pin1 > 15) ) {
-					node.error("msg.Pin not properly set for direct control of a MCP or PCF chip. It must be a nuber between 0-7 or 8-15");
+					node.error("msg.pin not properly set for direct control of a MCP or PCF chip. It must be a number between 0-7 or 8-15");
 					return false;
 				}
-				if (msg.State == null) {
-					node.error("msg.State not set for direct control of a MCP or PCF chip.");
+				if (msg.state == null) {
+					node.error("msg.state not set for direct control of a MCP or PCF chip.");
 					return false;
 				}
-				const _OnOff1 = (msg.State == true) || (msg.State == 1); //safe boolean conversion
+				const _OnOff1 = (msg.state == true) || (msg.state == 1); //safe boolean conversion
 				node.setOutput(_Pin1, _OnOff1, node);
 			} else
 
