@@ -36,6 +36,7 @@ Requires 'i2c-bus' module. [link...](https://github.com/fivdi/i2c-bus)
  - it reads inputs non-stop, can be set milisec value (a bit higher CPU usage)  
  - it might starts multiple timers that interfere with each other? (Needs investigation.)  
  - to minimize state-refresh problem there is secondary "de-bounce" timer  
+ - also [read this](https://github.com/PizzaProgram/MCP23017-PCF8574-AIO/issues/3#issuecomment-1080815256) tip about Raspberry Pi connection / button release
   
 # Config  
   
