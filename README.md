@@ -36,7 +36,6 @@ Requires 'i2c-bus' module. [link...](https://github.com/fivdi/i2c-bus)
  - it reads inputs non-stop, can be set milisec value (a bit higher CPU usage)  
  - it might starts multiple timers that interfere with each other? (Needs investigation.)  
  - to minimize state-refresh problem there is secondary "de-bounce" timer  
- - also [read this](https://github.com/PizzaProgram/MCP23017-PCF8574-AIO/issues/3#issuecomment-1080815256) tip about Raspberry Pi connection / button release
   
 # Config  
   
@@ -85,13 +84,22 @@ Requires 'i2c-bus' module. [link...](https://github.com/fivdi/i2c-bus)
 # Credit
 Thanks to Mike Wilson for the original v0.1 node: [MCP23017chip](https://flows.nodered.org/node/node-red-contrib-mcp23017chip)
 
+# Change Log 2022-06-26 (Y-M-D)  Version: 2.3.6.20220606
+by László Szakmári (www.pizzaprogram.hu)
 
-# Change Log 2022-03-26 (Y-M-D)  Version: 2.3.4.20220326
+ - BUG Fix: Too long read time caused a (.warning) error instead of increasing the timer interval x2.
+
+ - Enh.: If the last read time is shorter than interval, it resumes the timer at original interval.
+
+
+# Change Log 2022-03-26 (Y-M-D)  Version: 2.3.5.20220326
 by László Szakmári (www.pizzaprogram.hu)
 
  - PCF chips show now correct Address -at Main-Chip setup. Fixed.
 
  - Fixed "interval too short" auto-increase happaning if "interrupt-triggered" read occures
+
+ + Added examples 
 
 
 # Change Log 2022-03-25 (Y-M-D)  Version: 2.3.3.20220325

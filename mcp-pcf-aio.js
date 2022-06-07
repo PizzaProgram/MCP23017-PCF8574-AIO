@@ -183,7 +183,7 @@ module.exports = function(RED) {
 
 		// Timer related variables:
 		this.interval       = 0 + n.interval;
-		if ((this.interval < 20) && (this.interval != 0)) this.interval = 20; // one readout takes at least 8 ms x2 banks 
+//		if ((this.interval < 20) && (this.interval != 0)) this.interval = 20; // one readout takes at least 8 ms x2 banks 
 		this.origInterv     = this.interval;
 
 		this.chipTimer      = null;
@@ -240,7 +240,7 @@ module.exports = function(RED) {
 					if (log2consol) console.log("!!MCP chip-node-ids[_bitNum] != _callerNode.id =" + _callerNode.id );
 					_callerNode.lastState = -2; 	// error state
 					showState(_callerNode, -2, 2); // show red error status at the corner of the Node
-					_callerNode.error("!!MCP/PCF pin is already used by an other node:  Bit=" + _bitNum + "bus=" + _parCh.busNum + " addr=" + _parCh.addr); 					
+					_callerNode.error("!!MCP/PCF pin is already used by an other node: Bit=" + _bitNum + " Bus=" + _parCh.busNum + " Addr=" + _parCh.addr + " ID=" + _parCh.ids[_bitNum]); 					
 					return false;
 				} // 
 			}
@@ -420,10 +420,10 @@ module.exports = function(RED) {
 				_processState = 1;
 				let ipAll = 0;
 
-				if (_addr >= 0x40) {
+				if (_addr >= 0x40) { // it is a PCF8574 chip
 					if (timerLog && log2consol) console.log("  PCF8574 >> Now reading 8bit. Addr=" + _addr/2);
 					ipAll = _aBus.receiveByteSync( Math.ceil( _addr / 2 ) );
-					if (timerLog && log2consol) console.log("  MCP23017 Read success ipAll00=" + ipAll.toString(2));
+					if (timerLog && log2consol) console.log("  PCF8574 Read success ipAll00=" + ipAll.toString(2));
 				}
 				else {
 					if (timerLog && log2consol) console.log("  MCP23017 >> Now reading A+B banks... Typeof _aBUS:" + typeof(_aBus));
@@ -497,11 +497,14 @@ module.exports = function(RED) {
 			mainChipNode.RW_finish();
 			mainChipNode.lastTimeRed = performance.now(); //new Date().getTime();
 			mainChipNode.readLength  = mainChipNode.lastTimeRed - _readTime;
-			if (! read1x) {
+			if (! read1x) { // if "continuous read" is happening now
 				if (mainChipNode.interval < mainChipNode.readLength) {  // the time the reading took was too long. Increased the interval to double of that (ms).		
-					mainChipNode.warning("  MCP/PCF Interval (" + mainChipNode.interval + "ms) is too short for input. Setting new time = " + (mainChipNode.readLength * 2).toString);
-					mainChipNode.startChipTimer( mainChipNode.readLength * 2);
-				} 
+					mainChipNode.warn("  MCP/PCF Interval (" + mainChipNode.interval + "ms) is too short for input. Setting new time = " + (mainChipNode.readLength * 2).toString());
+					mainChipNode.startChipTimer( mainChipNode.readLength * 2); // double the waiting period
+				} else 
+				if ((mainChipNode.origInterv != mainChipNode.interval) && (mainChipNode.readLength < mainChipNode.origInterv)) {
+					mainChipNode.startChipTimer( mainChipNode.origInterv ); // set back original interval
+				}
 			}
 
 			return true;
