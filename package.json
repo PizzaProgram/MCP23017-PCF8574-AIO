@@ -20,15 +20,16 @@
     "io",
     "input",
     "output",
-    "aio",
     "mcp23017",
+    "mcp", "23017",
     "pcf8574",
+    "pcf", "8574",
     "channel"
   ],
   "license": "MIT",
   
   "name": "@pizzaprogram/mcp-pcf-aio",
-
+  
   "node-red": {
     "version": ">1.0.0",
     "nodes": {
@@ -40,15 +41,15 @@
     "url": "https://github.com/pizzaprogram/mcp23017-pcf8574-aio"
   },
   "scripts": {
-    "node-red": "node --inspect /usr/lib/node_modules/node-red/red.js"
+    "node-red": "node --nolazy --inspect-brk=9229 /usr/lib/node_modules/node-red/red.js -v --userDir /home/pi/.node-red -s /home/pi/.node-red/settings.js"
   },
   "old-scripts": {
     "node-red": "node /usr/lib/node_modules/node-red/red.js",
-    "node-red2": "node --inspect ./usr/lib/node_modules/node-red/red.js",
+    "node-red3": "node --inspect /usr/lib/node_modules/node-red/red.js",
     
     "inspect": "node --inspect ./usr/lib/node_modules/node-red/red.js --userDir ./home/pi/.node-red/node_modules/mcp-pcf-aio",
     "start": "node node_modules/node-red/red.js -v -u . -s settings.js",
     "debug": "node --nolazy --inspect-brk=9229 node_modules/node-red/red.js -v -u . -s settings.js"
   },
- "version": "2.3.4-20220326"
+ "version": "2.3.8-20220907"
 }

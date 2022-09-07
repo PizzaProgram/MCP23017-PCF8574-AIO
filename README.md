@@ -84,7 +84,28 @@ Requires 'i2c-bus' module. [link...](https://github.com/fivdi/i2c-bus)
 # Credit
 Thanks to Mike Wilson for the original v0.1 node: [MCP23017chip](https://flows.nodered.org/node/node-red-contrib-mcp23017chip)
 
-# Change Log 2022-06-26 (Y-M-D)  Version: 2.3.6.20220606
+### Change Log 2022-09-07 (Y-M-D)  Version: 2.3.8.20220907
+by László Szakmári (www.pizzaprogram.hu)
+
+  - Changed Interrupt initialization of the MCP chips: (EXPERIMENTAL! Testing needed.)
+    MIRROR=1 << If any of A or B input IO-bank pin changed, both INTA and INTB is triggered 
+    ODR=1    << Not only "Active-Low" state, but both "High/Low" input changes are triggered
+
+
+### Change Log 2022-06-07 (Y-M-D)  Version: 2.3.7.20220607
+by László Szakmári (www.pizzaprogram.hu)
+
+ - WARNING! Naming of commands and msg values changed !!! (No more Capital beginnings.)
+  `"All0"` -> `"all0"`
+  `"All1"` -> `"all1"`
+  `msg.AllStatesRaw` -> `msg.allStatesRaw`
+  ... also fixed name convention at source code, like `OnOFF` -> `on_off`
+  Read more [here](https://discourse.nodered.org/t/new-mcp23017-pcf8574-all-in-one-node/60087/7)
+
+ - If read-interval is set to 0 it will clear any running timer.
+
+
+### Change Log 2022-06-06 (Y-M-D)  Version: 2.3.6.20220606
 by László Szakmári (www.pizzaprogram.hu)
 
  - BUG Fix: Too long read time caused a (.warning) error instead of increasing the timer interval x2.
@@ -92,7 +113,7 @@ by László Szakmári (www.pizzaprogram.hu)
  - Enh.: If the last read time is shorter than interval, it resumes the timer at original interval.
 
 
-# Change Log 2022-03-26 (Y-M-D)  Version: 2.3.5.20220326
+### Change Log 2022-03-26 (Y-M-D)  Version: 2.3.5.20220326
 by László Szakmári (www.pizzaprogram.hu)
 
  - PCF chips show now correct Address -at Main-Chip setup. Fixed.
@@ -102,13 +123,13 @@ by László Szakmári (www.pizzaprogram.hu)
  + Added examples 
 
 
-# Change Log 2022-03-25 (Y-M-D)  Version: 2.3.3.20220325
+### Change Log 2022-03-25 (Y-M-D)  Version: 2.3.3.20220325
 by László Szakmári (www.pizzaprogram.hu)
 
  - Changed `msg.pin` and `msg.state` to lower case.
 
 
-# Change Log 2022-03-22 (Y-M-D)  Version: 2.3.2.20220322
+### Change Log 2022-03-22 (Y-M-D)  Version: 2.3.2.20220322
 by László Szakmári (www.pizzaprogram.hu)
 
 - you can set 1-1 node only pro 0-7 or 8-15 and control via `msg.Pin=` and `msg.State=` if `msg.Payload=-1`  
@@ -116,13 +137,13 @@ by László Szakmári (www.pizzaprogram.hu)
 - fixed `consol.warning` bug if Timer set = 0ms.  
 
 
-# Change Log 2022-03-21 (Y-M-D)  Version: 2.3.1.20220321
+### Change Log 2022-03-21 (Y-M-D)  Version: 2.3.1.20220321
 by László Szakmári (www.pizzaprogram.hu)
 
 - Fixed bug: on input change payload was always "true". 
 
 
-# Change Log 2022-03-19 (Y-M-D)  Version: 2.3.0.20220319
+### Change Log 2022-03-19 (Y-M-D)  Version: 2.3.0.20220319
 by László Szakmári (www.pizzaprogram.hu)
 
 - FIRST OFFICIAL RELEASE
@@ -132,7 +153,7 @@ by László Szakmári (www.pizzaprogram.hu)
 - fixed bugs (like: partial Deploy did not clear prev. instances from context)
 
 
-# Change Log 2022-03-03 (Y-M-D)  Version: 2.3.0.20220303
+### Change Log 2022-03-03 (Y-M-D)  Version: 2.3.0.20220303
 by László Szakmári (www.pizzaprogram.hu)
 
 - Added PCF8574 + PCF8574A chip support. Both In + Out. 
@@ -152,7 +173,7 @@ by László Szakmári (www.pizzaprogram.hu)
 - New Github upload. (PFC false-named one got deleted)
 
 
-# Change Log 2021-01-11 (Y-M-D) 
+### Change Log 2021-01-11 (Y-M-D) 
 by László Szakmári (www.pizzaprogram.hu)
 
 - **!!! IMPORTANT CHANGE:**
@@ -192,7 +213,7 @@ by László Szakmári (www.pizzaprogram.hu)
 -- Many comments + constants + references added to code
 -- Fixed help in mcp_pcf_chip.html file
 
-# Change Log 2021-09-12 (Y-M-D) 
+### Change Log 2021-09-12 (Y-M-D) 
 - Fixed input
 
 - Add input trigger to handle interrupts. If msg.payload = True >> and succesfully read 
@@ -202,7 +223,7 @@ by László Szakmári (www.pizzaprogram.hu)
 
 - debounce is not starting if =0
 
-# Change Log 2021-11-11 (Y-M-D) 
+### Change Log 2021-11-11 (Y-M-D) 
 - Node name changed from MCP23017chip to current ,mcp_pfc_aio v2.1.0 
  ( _AIO = All in One  IO = Input Output_ )
 
