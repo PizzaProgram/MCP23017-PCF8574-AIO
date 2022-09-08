@@ -49,53 +49,53 @@ module.exports = function(RED) {
 
 
     // IOCON.BANK = 0 mode << !!! Using this is NOT recommended, because it causing "sequential read" of A/B bank, not a fixed side 
-    const BNK0_IODIR_A		= 0x00; 	//< Controls the direction of the data Input/Output for port A.
-    const BNK0_IODIR_B		= 0x01;		//< Controls the direction of the data Input/Output for port B.
-    const BNK0_IPOL_A		= 0x02;		//< Configures the polarity on the corresponding GPIO_ port bits for input port A.
-    const BNK0_IPOL_B		= 0x03;		//< Configures the polarity on the corresponding GPIO_ port bits for input port B.
-    const BNK0_GPINTEN_A	= 0x04;		//< Controls the input interrupt-on-change for each pin of port A.
-    const BNK0_GPINTEN_B	= 0x05;		//< Controls the input interrupt-on-change for each pin of port B.
-    const BNK0_DEFVAL_A		= 0x06;		//< Controls the default comparison value for interrupt-on-change for port A.
-    const BNK0_DEFVAL_B		= 0x07;		//< Controls the default comparison value for interrupt-on-change for port B.
-    const BNK0_INTCON_A		= 0x08;		//< Controls how the associated pin value is compared for the interrupt-on-change for port A.
-    const BNK0_INTCON_B		= 0x09;		//< Controls how the associated pin value is compared for the interrupt-on-change for port B.
-    const BNK0_IOCON_A		= 0x0A;		//< Controls the device. (0, INTPOL, ODR, HAEN, DISSLW, SEQOP, MIRROR, BANK) = 0x0B too
-    const BNK0_IOCON_B		= 0x0B;		//< Controls the device. (0, INTPOL, ODR, HAEN, DISSLW, SEQOP, MIRROR, BANK) = 0x0B too
-    const BNK0_GPPU_A		= 0x0C;		//< Controls the input pull-up resistors for the port A pins.
-    const BNK0_GPPU_B		= 0x0D;		//< Controls the input pull-up resistors for the port B pins.
-    const BNK0_INTF_A		= 0x0E;		//< Reflects the input interrupt condition on the port A pins.
-    const BNK0_INTF_B		= 0x0F;		//< Reflects the input interrupt condition on the port B pins.
-    const BNK0_INTCAP_A		= 0x10;		//< Captures the port A value at the time the interrupt occurred.
-    const BNK0_INTCAP_B		= 0x11;		//< Captures the port B value at the time the interrupt occurred.
-    const BNK0_GPIO_A		= 0x12;		//< Reflects the value on the port A.
-    const BNK0_GPIO_B		= 0x13;		//< Reflects the value on the port B.
-    const BNK0_OLAT_A		= 0x14;		//< Provides access to the port A output latches.
-    const BNK0_OLAT_B		= 0x15;		//< Provides access to the port B output latches.
+    const BNK0_IODIR_A		= 0x00;
+    const BNK0_IODIR_B		= 0x01;
+    const BNK0_IPOL_A		= 0x02;
+    const BNK0_IPOL_B		= 0x03;
+    const BNK0_GPINTEN_A	= 0x04;
+    const BNK0_GPINTEN_B	= 0x05;
+    const BNK0_DEFVAL_A		= 0x06;
+    const BNK0_DEFVAL_B		= 0x07;
+    const BNK0_INTCON_A		= 0x08;
+    const BNK0_INTCON_B		= 0x09;
+    const BNK0_IOCON_A		= 0x0A;
+    const BNK0_IOCON_B		= 0x0B;
+    const BNK0_GPPU_A		= 0x0C;
+    const BNK0_GPPU_B		= 0x0D;
+    const BNK0_INTF_A		= 0x0E;
+    const BNK0_INTF_B		= 0x0F;
+    const BNK0_INTCAP_A		= 0x10;
+    const BNK0_INTCAP_B		= 0x11;
+    const BNK0_GPIO_A		= 0x12;
+    const BNK0_GPIO_B		= 0x13;
+    const BNK0_OLAT_A		= 0x14;
+    const BNK0_OLAT_B		= 0x15;
 
 // The following register addresses assume IOCON.BANK = 1 		<< THIS IS what this program is using
-    const BNK1_IODIR_A   = 0x00;
-    const BNK1_IPOL_A    = 0x01;
-    const BNK1_GPINTEN_A = 0x02;
-    const BNK1_DEFVAL_A  = 0x03;
-    const BNK1_INTCON_A  = 0x04;
-    const BNK1_IOCON_A   = 0x05;
-    const BNK1_GPPU_A    = 0x06;
-    const BNK1_INTF_A    = 0x07;
-    const BNK1_INTCAP_A  = 0x08;
-    const BNK1_GPIO_A    = 0x09;
-    const BNK1_OLAT_A    = 0x0A;
+    const BNK1_IODIR_A   = 0x00; //< Controls the direction of the data Input/Output for port A.
+    const BNK1_IPOL_A    = 0x01; //< Configures the polarity on the corresponding GPIO_ port bits for input port A.
+    const BNK1_GPINTEN_A = 0x02; //< Controls the input interrupt-on-change for each pin of port A.
+    const BNK1_DEFVAL_A  = 0x03; //< Controls the default comparison value for interrupt-on-change for port A.
+    const BNK1_INTCON_A  = 0x04; //< Controls how the associated pin value is compared for the interrupt-on-change for port A.
+    const BNK1_IOCON_A   = 0x05; //< Controls the device. (0, INTPOL, ODR, HAEN, DISSLW, SEQOP, MIRROR, BANK) = 0x0B too
+    const BNK1_GPPU_A    = 0x06; //< Controls the input pull-up resistors for the port A pins.
+    const BNK1_INTF_A    = 0x07; //< Reflects the input interrupt condition on the port A pins.
+    const BNK1_INTCAP_A  = 0x08; //< Captures the port A value at the time the interrupt occurred.
+    const BNK1_GPIO_A    = 0x09; //< Reflects the value on the port A.
+    const BNK1_OLAT_A    = 0x0A; //< Provides access to the port A output latches.
     
-    const BNK1_IODIR_B   = 0x10;
-    const BNK1_IPOL_B    = 0x11;
-    const BNK1_GPINTEN_B = 0x12;
-    const BNK1_DEFVAL_B  = 0x13;
-    const BNK1_INTCON_B  = 0x14;
-    const BNK1_IOCON_B   = 0x15;
-    const BNK1_GPPU_B    = 0x16;
-    const BNK1_INTF_B    = 0x17;
-    const BNK1_INTCAP_B  = 0x18;
-    const BNK1_GPIO_B    = 0x19;
-    const BNK1_OLAT_B    = 0x1A;
+    const BNK1_IODIR_B   = 0x10; //< Controls the direction of the data Input/Output for port B.
+    const BNK1_IPOL_B    = 0x11; //< Configures the polarity on the corresponding GPIO_ port bits for input port B.
+    const BNK1_GPINTEN_B = 0x12; //< Controls the input interrupt-on-change for each pin of port B.
+    const BNK1_DEFVAL_B  = 0x13; //< Controls the default comparison value for interrupt-on-change for port B.
+    const BNK1_INTCON_B  = 0x14; //< Controls how the associated pin value is compared for the interrupt-on-change for port B.
+    const BNK1_IOCON_B   = 0x15; //< Controls the device. (0, INTPOL, ODR, HAEN, DISSLW, SEQOP, MIRROR, BANK) = 0x0B too
+    const BNK1_GPPU_B    = 0x16; //< Controls the input pull-up resistors for the port B pins.
+    const BNK1_INTF_B    = 0x17; //< Reflects the input interrupt condition on the port B pins.
+    const BNK1_INTCAP_B  = 0x18; //< Captures the port B value at the time the interrupt occurred.
+    const BNK1_GPIO_B    = 0x19; //< Reflects the value on the port B.
+    const BNK1_OLAT_B    = 0x1A; //< Provides access to the port B output latches.
 
     var i2cModule = require("i2c-bus"); // https://github.com/fivdi/i2c-bus
     var process   = require('process');
@@ -279,7 +279,7 @@ module.exports = function(RED) {
                 else 
                 { 	// *** MCP23017 Chip  *** //
 
-                        function bbb () {
+                        function bbb () { // this proc. is only for testing
                             let bank0 = -1;  let bank1 = -1; 
                             bank0 = aBus.readByteSync(_parCh.addr, BNK0_IOCON_B);
                             bank1 = aBus.readByteSync(_parCh.addr, BNK1_IOCON_A);
@@ -325,19 +325,21 @@ module.exports = function(RED) {
                     
                     if (_isInput) {
                         if (_pullUp)  { _parCh.pullUps  = _parCh.pullUps  | (1 << _bitNum) } else { _parCh.pullUps  = _parCh.pullUps  & ~(1 << _bitNum) };
-    //					if (_invert)  { _parCh.inverts  = _parCh.inverts  | (1 << _bitNum) } else { _parCh.inverts  = _parCh.inverts  & ~(1 << _bitNum) };
-                        
+
                         if (log2consol) console.log("  MCP Input pullups=" + _parCh.pullUps);
+
                         if (_bitNum < 8)	{aBus.writeByteSync(_parCh.addr, BNK1_GPPU_A ,    _parCh.pullUps        & 0xFF);} //update input pull-up 100kQ resistor A
                         else				{aBus.writeByteSync(_parCh.addr, BNK1_GPPU_B ,   (_parCh.pullUps  >> 8) & 0xFF);} //update input pull-up 100kQ resistor B
-                        aBus.writeByteSync(_parCh.addr, BNK1_IPOL_A, 0x00); //turn OFF input invert A
-                        aBus.writeByteSync(_parCh.addr, BNK1_IPOL_B, 0x00); //turn OFF input invert B
-                        if (_bitNum < 8)	{aBus.writeByteSync(_parCh.addr, BNK1_IPOL_A, 0x00);} //disable input invert A
-                        else				{aBus.writeByteSync(_parCh.addr, BNK1_IPOL_B, 0x00);} //disable input invert B
-    //					if (_bitNum < 8)	{aBus.writeByteSync(_parCh.addr, IPOL_A,     _parCh.inverts        & 0xFF);} //update input invert A
-    //					else				{aBus.writeByteSync(_parCh.addr, IPOL_B,    (_parCh.inverts  >> 8) & 0xFF);} //update input invert B
-                        if (_bitNum < 8)	{aBus.writeByteSync(_parCh.addr, BNK1_GPINTEN_A,  _parCh.isInputs       & 0xFF);} //update interrupts A
-                        else				{aBus.writeByteSync(_parCh.addr, BNK1_GPINTEN_B, (_parCh.isInputs >> 8) & 0xFF);} //update interrupts B
+
+                        if (_bitNum < 8)	{aBus.writeByteSync(_parCh.addr, BNK1_IPOL_A, 0x00);} //disable Input invert(=POLarity) A
+                        else				{aBus.writeByteSync(_parCh.addr, BNK1_IPOL_B, 0x00);} //disable Input invert(=POLarity) B
+
+                        if (_bitNum < 8)	{aBus.writeByteSync(_parCh.addr, BNK1_GPINTEN_A,  _parCh.isInputs       & 0xFF);} //set INTerrupts ENable A
+                        else				{aBus.writeByteSync(_parCh.addr, BNK1_GPINTEN_B, (_parCh.isInputs >> 8) & 0xFF);} //set INTerrupts ENable B
+
+                        if (_bitNum < 8)	{aBus.writeByteSync(_parCh.addr, BNK1_INTCON_A,  _parCh.isInputs       & 0xFF);} //set INTerrupts CONtrol A
+                        else				{aBus.writeByteSync(_parCh.addr, BNK1_INTCON_B, (_parCh.isInputs >> 8) & 0xFF);} //set INTerrupts CONtrol B
+                        
                     }
 
                 } // MCP chip

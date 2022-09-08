@@ -84,13 +84,19 @@ Requires 'i2c-bus' module. [link...](https://github.com/fivdi/i2c-bus)
 # Credit
 Thanks to Mike Wilson for the original v0.1 node: [MCP23017chip](https://flows.nodered.org/node/node-red-contrib-mcp23017chip)
 
+### Change Log 2022-09-08 (Y-M-D)  Version: 2.3.9.20220908
+by László Szakmári (www.pizzaprogram.hu)
+
+  - Changed Interrupt initialization of the MCP chips again: (EXPERIMENTAL! Testing needed.)  
+    IOC=1 << If any of A or B input IO-bank pin changed, both INTA and INTB is triggered  
+  
 ### Change Log 2022-09-07 (Y-M-D)  Version: 2.3.8.20220907
 by László Szakmári (www.pizzaprogram.hu)
 
-  - Changed Interrupt initialization of the MCP chips: (EXPERIMENTAL! Testing needed.)
-    MIRROR=1 << If any of A or B input IO-bank pin changed, both INTA and INTB is triggered 
-    ODR=1    << Not only "Active-Low" state, but both "High/Low" input changes are triggered
-
+  - Changed Interrupt initialization of the MCP chips: (EXPERIMENTAL! Testing needed.)  
+    MIRROR=1 << If any of A or B input IO-bank pin changed, both INTA and INTB is triggered  
+    ODR=1    << Not only "Active-Low" state, but both "High/Low" input changes are triggered  
+  
 
 ### Change Log 2022-06-07 (Y-M-D)  Version: 2.3.7.20220607
 by László Szakmári (www.pizzaprogram.hu)
