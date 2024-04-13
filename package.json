@@ -51,5 +51,5 @@
     "start": "node node_modules/node-red/red.js -v -u . -s settings.js",
     "debug": "node --nolazy --inspect-brk=9229 node_modules/node-red/red.js -v -u . -s settings.js"
   },
- "version": "2.3.9-20220908"
+ "version": "2.4.0-20220909"
 }

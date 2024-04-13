@@ -1,4 +1,12 @@
-# A Node-Red node for the MCP23017 & PCF8574 chips  
+# !!! A NEW, more advanced repo, (based on this one) is: [here](https://www.npmjs.com/package/@joe-ab1do/mcp-pcf-aio):  
+- It can handle +2 chip types: MCP23008 and PCF8575.  
+- It has better configuration possibilities via Node-red GUI. (eg. I2C addr A0 A1 A2)  
+- Auto limiting the MCPxxx chip's output problems on 7. + 15. pins.  
+- Has a "Legacy" checkbox to use this node's behaviour for backward compatibility.  
+- Working IRQ! (Tested.)  
+... see [full list of change logs](https://www.npmjs.com/package/@joe-ab1do/mcp-pcf-aio#change-logs) of his excellent work.  
+  
+# This is a Node-Red node for the MCP23017 & PCF8574 chips  
   
 - About Node-Red [link...](https://nodered.org/)  
 - [Link for the MCP chip itself](https://www.microchip.com/wwwproducts/en/MCP23017)  
@@ -7,9 +15,9 @@
 - [Chip specs. PDF](https://www.ti.com/lit/gpn/pcf8574)  
 - [Node-RED node](https://flows.nodered.org/node/mcp23017-pcf8574-aio)  
 - [Github source](https://github.com/PizzaProgram/mcp23017-pcf8574-aio)  
-- [Forum discussion](https://discourse.nodered.org/t/new-mcp23017-pcf8574-all-in-one-node)
+- [NR. Forum discussion](https://discourse.nodered.org/t/new-mcp23017-pcf8574-all-in-one-node)
   
-# Code Language:  
+### Code Language:  
   
 - [Node.js](https://nodejs.org)  
 - [JavaScript](https://en.wikipedia.org/wiki/JavaScript)  
@@ -84,11 +92,22 @@ Requires 'i2c-bus' module. [link...](https://github.com/fivdi/i2c-bus)
 # Credit
 Thanks to Mike Wilson for the original v0.1 node: [MCP23017chip](https://flows.nodered.org/node/node-red-contrib-mcp23017chip)
 
-### Change Log 2022-09-08 (Y-M-D)  Version: 2.3.9.20220908
-by László Szakmári (www.pizzaprogram.hu)
+### Change Log 2022-09-09 (Y-M-D)  Version: 2.4.0.20220909
+by László Szakmári (www.pizzaprogram.hu)  
 
-  - Changed Interrupt initialization of the MCP chips again: (EXPERIMENTAL! Testing needed.)  
-    IOC=1 << If any of A or B input IO-bank pin changed, both INTA and INTB is triggered  
+  - Better Logging options at chip node: 
+    log2consol : default True ; _(If changed to False, it will not put log messages to node-red-log)_
+	logTimer   : default False; _(If changed to True, it will create lot's of interrupt and timed-red logs!)
+    Max lines of logs are set to 1000 lines. 
+	  _(After that no more logs are added, so it will not overfill Node-RED's log system.)_
+	  It can be changed by editing the: var logMaxLines = 1000; inside `mcp-pcf-aio.js` file at 50. line. 
+    Added require("worker_threads") dependency;
+
+### Change Log 2022-09-08 (Y-M-D)  Version: 2.3.9.20220908
+by László Szakmári (www.pizzaprogram.hu)  
+
+  - Changed INTerrupt CONrol of the MCP chips: (EXPERIMENTAL! Testing needed.)  
+    INTCON=1 << If any of A or B input IO-bank pin changed, both INTA and INTB is triggered  
   
 ### Change Log 2022-09-07 (Y-M-D)  Version: 2.3.8.20220907
 by László Szakmári (www.pizzaprogram.hu)
@@ -101,14 +120,14 @@ by László Szakmári (www.pizzaprogram.hu)
 ### Change Log 2022-06-07 (Y-M-D)  Version: 2.3.7.20220607
 by László Szakmári (www.pizzaprogram.hu)
 
- - WARNING! Naming of commands and msg values changed !!! (No more Capital beginnings.)
-  `"All0"` -> `"all0"`
-  `"All1"` -> `"all1"`
-  `msg.AllStatesRaw` -> `msg.allStatesRaw`
-  ... also fixed name convention at source code, like `OnOFF` -> `on_off`
-  Read more [here](https://discourse.nodered.org/t/new-mcp23017-pcf8574-all-in-one-node/60087/7)
+ - WARNING! Naming of commands and msg values changed !!! (No more Capital beginnings.)  
+  `"All0"` -> `"all0"`  
+  `"All1"` -> `"all1"`  
+  `msg.AllStatesRaw` -> `msg.allStatesRaw`  
+  ... also fixed name convention at source code, like `OnOFF` -> `on_off`  
+  Read more [here](https://discourse.nodered.org/t/new-mcp23017-pcf8574-all-in-one-node/60087/7)  
 
- - If read-interval is set to 0 it will clear any running timer.
+ - If read-interval is set to 0 it will clear any running timer.  
 
 
 ### Change Log 2022-06-06 (Y-M-D)  Version: 2.3.6.20220606
@@ -164,7 +183,7 @@ by László Szakmári (www.pizzaprogram.hu)
 
 - Added PCF8574 + PCF8574A chip support. Both In + Out. 
 
-- Fixed Naming of PFC... to PCF... (the original code was spelled wrong).
+- Fixed Naming of PFC... to PCF... _(the original code was spelled wrong!)_.
 
 - Detailed Logging to consol can be turned on/off with `const log2consol = False;`  and `timerLog = false;`
 
@@ -184,12 +203,12 @@ by László Szakmári (www.pizzaprogram.hu)
 
 - **!!! IMPORTANT CHANGE:**
  -- [ x ] Inverse is now affecting Output too ! 
- (Some relay boards are functioning "the opposite way", turning ON if pin is Low.)
+ (Some relay boards are functioning "the opposite way", turning ON if pin is Low.)  
 
 - Changed Bus open/close behaviour. Separate open before/after each read/write operation block. 
   (This way no more non-stop opened bus > no more NodeRed crash if unexpected disconnect.)
 
-- Fixed other NR crashes: Added Error handling (try - catch) for each i2c bus operation.
+- Fixed other NR crashes: Added Error handling (try - catch) for each i2c bus operation.  
   Each operation has it's own value to report proper error text. _(Like: "Bus opening failed", ... etc)_
   (But execution time increased from 8ms to 12ms on Raspberri 4)
 
