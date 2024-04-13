@@ -2,6 +2,7 @@
 
 // const { truncate } = require("fs");
 const { clearInterval } = require("timers");
+const { threadId } = require("worker_threads");
 
 debugger
 
@@ -26,14 +27,14 @@ debugger
     //		*** chip initialisation (IOCON values) *** //
     //			... enables "byte mode" (IOCON.BANK = 0 and IOCON.SEQOP = 0).
 
-    //bit7 BANK		= 	0 : sequential register addresses (See PDF: Table 3-3)
-    //bit6 MIRROR	= 	0 : use configure Interrupt 
-    //bit5 SEQOP	= 	0 : sequential operation disabled, address pointer does not increment
+    //bit7 BANK		= 	1 : sequential register addresses (See PDF: Table 3-3)
+    //bit6 MIRROR	= 	1 : use configure Interrupt 
+    //bit5 SEQOP	= 	1 : sequential operation disabled, address pointer does not increment
     //bit4 DISSLW	= 	0 : The "Slew Rate" bit controls the slew rate function on the SDA pin. If enabled, the SDA slew rate will be controlled when driving from a high to low.
     //bit3 HAEN		= 	0 : hardware address pin is always enabled on 23017
     //bit2 ODR		= 	0 : open drain output.  Enables/disables the INT pin for open-drain configuration. Setting this bit overrides the INTPOL bit.
-    //bit1 INTPOL	= 	0 : interrupt active low (Sets the polarity of the INT pin. This bit is functional only when the ODR bit is cleared, configuring the INT pin as active push-pull)
-    //bit0 xxx unused
+    //bit1 INTPOL	= 	1 : interrupt active low (Sets the polarity of the INT pin. This bit is functional only when the ODR bit is cleared, configuring the INT pin as active push-pull)
+    //bit0 xxx unused = 0 
     //       for example SEQOP = 1:   write ( addr, IOCON, 0b00100000 ); = 32 dec = 0x20
 
 module.exports = function(RED) {
@@ -44,9 +45,9 @@ module.exports = function(RED) {
         "Writing byte",				// 2
         "Closing i2c bus"];			// 3
 
-    const log2consol = true;	// enabling it shows detailed logs in:  node-red-log
-    const timerLog   = false; // !! WARNING !!   << if true, it will fill up the log with ALL read events (up to 50x3 msg. pro sec !! if read interval is 20ms)
-
+    var log2consol = true;	// enabling it shows detailed logs in:  node-red-log
+//  var logTimer   = false; // !! WARNING !!   << if true, it will fill up the log with ALL read events (up to 50x3 msg. pro sec !! if read interval is 20ms)
+    var logMaxLines = 1000; // it will be decreased until reaching 0 to stop spamming full the whole log file
 
     // IOCON.BANK = 0 mode << !!! Using this is NOT recommended, because it causing "sequential read" of A/B bank, not a fixed side 
     const BNK0_IODIR_A		= 0x00;
@@ -132,9 +133,7 @@ module.exports = function(RED) {
         return (number & clearMask) | (bitValueNormalized << bitPosition);
     }
     
-  
-
-
+    // Show "red / yellow / green / greey" point next to the node
     function showState (_obj, _onOffState, _errorState) {
         // _errorState:  if address is taken or a global error occurred while trying read/write to the chip	
         if (log2consol) console.log("  ...state update >>  _onOffState: " + _onOffState +"   globalState= "+ _errorState + "  Node_id=" + _obj.id);
@@ -163,10 +162,22 @@ module.exports = function(RED) {
         }
     }
 
-
+// *** MAIN CHIP :
+// *****************
     function mcp_pcf_chipNode(n) {
         RED.nodes.createNode(this, n);
-        var mainChipNode = this;
+        var mainChip = this;
+
+        log2consol          = n.log2consol;
+        mainChip.logTimer   = n.logTimer;
+
+        this.lgc = function () { // check if detailed logging (inside a high freq. timer)  is enabled?
+            if (!log2consol)        return false;
+            if (!mainChip.logTimer) return false;
+            if (logMaxLines == 0)   return false;
+            logMaxLines--; // max 1000 log lines enabled
+            return true;
+        }
 
         this.busNum         = parseInt(n.busNum, 10); // converts string to decimal (10)
         this.addr           = parseInt(n.addr  , 16); // converts from HEXA (16) to decimal (10)
@@ -206,14 +217,14 @@ module.exports = function(RED) {
         // TODO: block RW operations happening at the same time...
 
         this.RW_check = function() {
-            if ( mainChipNode.rwIsHappening ) return false;
+            if ( mainChip.rwIsHappening ) return false;
             if (global_i2c_bus_RW_ctx.get(_i2c_ctx_name) == null) return false;
-            mainChipNode.rwIsHappening = true;
+            mainChip.rwIsHappening = true;
             global_i2c_bus_RW_ctx.set(_i2c_ctx_name, true);
             return true;
         }
         this.RW_finish = function() {
-            mainChipNode.rwIsHappening = false;
+            mainChip.rwIsHappening = false;
             global_i2c_bus_RW_ctx.set(_i2c_ctx_name, false);
         }
 
@@ -378,26 +389,26 @@ module.exports = function(RED) {
             
             if ((_newInterval == undefined) || (_newInterval == 0)) {
                 console.log("  MCP/PCF  Timer interval is UNDEFINED or 0 ! Timer will not be started, old may be cleared. Exiting.");
-                if (mainChipNode.chipTimer) clearInterval(mainChipNode.chipTimer);
+                if (mainChip.chipTimer) clearInterval(mainChip.chipTimer);
                 return null;
             }
 
-            if (mainChipNode.chipTimer != null) { // timer is already running
+            if (mainChip.chipTimer != null) { // timer is already running
                 if (log2consol) console.log("  MCP/PCF Timer is already running");
-                if (mainChipNode.interval == _newInterval) {
+                if (mainChip.interval == _newInterval) {
                     if (log2consol) console.log("  MCP/PCF This timer interval is already set. There is nothing to do.");
                     return null;
                 } // nothing to do
-                clearInterval(mainChipNode.chipTimer); // clear old, so a new can started
-                mainChipNode.interval = _newInterval;
-                mainChipNode.chipTimer = null;
+                clearInterval(mainChip.chipTimer); // clear old, so a new can started
+                mainChip.interval = _newInterval;
+                mainChip.chipTimer = null;
                 if (log2consol) console.log("  MCP/PCF Old timer destroyed.");
             }
 
         
             // STARTING a Timer in repeat mode
             if (log2consol) console.log("  MCP/PCF Starting Timer now...");				
-            mainChipNode.chipTimer = setInterval(mainChipNode.myTimer, mainChipNode.interval );
+            mainChip.chipTimer = setInterval(mainChip.myTimer, mainChip.interval );
         }
 
         // START the timer now ... >> moved this part to InputNode-creation
@@ -407,62 +418,62 @@ module.exports = function(RED) {
         this.myTimer = function(read1x) {
 
             let   _processState = 0;
-            const _addr = mainChipNode.addr;
+            const _addr = mainChip.addr;
 
-            if (isNaN(mainChipNode.busNum))     {
+            if (isNaN(mainChip.busNum))     {
                 console.error("  MCP/PCF  chip myTimer busNum is undefined. Exiting.");
-                mainChipNode.globalState += 2;
+                mainChip.globalState += 2;
                 return false;
             }
-            if ( ! mainChipNode.RW_check() ) {
+            if ( ! mainChip.RW_check() ) {
                 console.error("  MCP/PCF myTimer is already running. Preventing to overlap > Exiting.");
                 return false;
             } // prevent overlapping
             
             const _readTime	= performance.now(); // millisec. To change the Timer value, if a too short period is set.
             try {
-                if (timerLog && log2consol) console.log("  MCP/PCF myTimer: opening bus...  Time: " + new Date( new Date().getTime() ).toISOString().slice(11, -1) );
+                if (mainChip.lgc()) console.log("  MCP/PCF myTimer: opening bus...  Time: " + new Date( new Date().getTime() ).toISOString().slice(11, -1) );
     
                 // this.on('error', function( i2cErr ) { timerErrorHandler(i2cErr) } ); // start async error handling
 
-                let _aBus = i2cModule.openSync(mainChipNode.busNum);
+                let _aBus = i2cModule.openSync(mainChip.busNum);
                 _processState = 1;
                 let ipAll = 0;
 
                 if (_addr >= 0x40) { // it is a PCF8574 chip
-                    if (timerLog && log2consol) console.log("  PCF8574 >> Now reading 8bit. Addr=" + _addr/2);
+                    if (mainChip.lgc()) console.log("  PCF8574 >> Now reading 8bit. Addr=" + _addr/2);
                     ipAll = _aBus.receiveByteSync( Math.ceil( _addr / 2 ) );
-                    if (timerLog && log2consol) console.log("  PCF8574 Read success ipAll00=" + ipAll.toString(2));
+                    if (mainChip.lgc()) console.log("  PCF8574 Read success ipAll00=" + ipAll.toString(2));
                 }
                 else {
-                    if (timerLog && log2consol) console.log("  MCP23017 >> Now reading A+B banks... Typeof _aBUS:" + typeof(_aBus));
+                    if (mainChip.lgc()) console.log("  MCP23017 >> Now reading A+B banks... Typeof _aBUS:" + typeof(_aBus));
                     let ipA = _aBus.readByteSync(_addr, BNK1_GPIO_A);
                     let ipB = _aBus.readByteSync(_addr, BNK1_GPIO_B);
                     ipAll = ipA + (ipB << 8);
-                    if (timerLog && log2consol) console.log("  MCP23017 Read success ipA00=" + ipA.toString(2) + "  ipB00=" + ipB.toString(2) + "   ipALL (dec)=" + ipAll);
+                    if (mainChip.lgc()) console.log("  MCP23017 Read success ipA00=" + ipA.toString(2) + "  ipB00=" + ipB.toString(2) + "   ipALL (dec)=" + ipAll);
                 }
 //				mainChipNode.lastTimeRed = performance.now();
                 _processState = 3;
                 _aBus.closeSync();
 
-                if (mainChipNode.globalState != 1) {
-                    mainChipNode.globalState = 1; // successful read occured. No more "error state" or "uninitialised"
-                    if (mainChipNode.interval != mainChipNode.origInterv) { 
-                        if (timerLog && log2consol) console.log("  MCP/PCF Starting ChipTimer. Interval=" + mainChipNode.origInterv);
-                        mainChipNode.startChipTimer( mainChipNode.origInterv ); // this will delete the old timer and start normally again
+                if (mainChip.globalState != 1) {
+                    mainChip.globalState = 1; // successful read occured. No more "error state" or "uninitialised"
+                    if (mainChip.interval != mainChip.origInterv) { 
+                        if (mainChip.lgc()) console.log("  MCP/PCF Starting ChipTimer. Interval=" + mainChip.origInterv);
+                        mainChip.startChipTimer( mainChip.origInterv ); // this will delete the old timer and start normally again
                     }
                 }
 
                 // *********  Now checking ALL the possible nodes, if any of these needs to be updated
-                if (ipAll != mainChipNode.allStates){
-                    let diffWord = ipAll ^ mainChipNode.allStates;
+                if (ipAll != mainChip.allStates){
+                    let diffWord = ipAll ^ mainChip.allStates;
                     if (log2consol) console.log("!Change! of an i2c  MCP/PCF input. IP MASK0000=" + ipAll.toString(2) + "  Diff Mask0000=" + diffWord.toString(2));
-                    for (let i=0; i < mainChipNode.MaxBits; i++){	// (MaxBits= 8 or 16)
+                    for (let i=0; i < mainChip.MaxBits; i++){	// (MaxBits= 8 or 16)
                         if (diffWord & (1 << i)){
                             const newState =  (((ipAll & (1 << i)) == 0) ? false : true); 
-                            if ( mainChipNode.ids[i] != null)  {
-                                const n = RED.nodes.getNode(mainChipNode.ids[i]);
-                                if (log2consol) console.log("  MCP/PCF  > ..searching for node i=" + i + "   id=" + mainChipNode.ids[i] + "  found node:" + n + "  glob_inp=" + mainChipNode.isInputs);
+                            if ( mainChip.ids[i] != null)  {
+                                const n = RED.nodes.getNode(mainChip.ids[i]);
+                                if (log2consol) console.log("  MCP/PCF  > ..searching for node i=" + i + "   id=" + mainChip.ids[i] + "  found node:" + n + "  glob_inp=" + mainChip.isInputs);
                                 if (n != null) { //&& (mainChipNode.isInputs & (1 << i)) > 0){ // check bit is used and is an input
                                     if (log2consol) console.log("  MCP/PCF  > Found a Node needs to be updated. Bit=" + i + " newState=" + newState + "   LastState=" + n.lastState);
                                     n.changed(newState, read1x);
@@ -470,31 +481,31 @@ module.exports = function(RED) {
                             }
                         }
                     }
-                    mainChipNode.allStates = ipAll;
+                    mainChip.allStates = ipAll;
                 }	
             }
             catch (err) {
-                if (mainChipNode.globalState < 63) mainChipNode.globalState += 2;  // The whole chip in error mode, because the Bus could not be opened. Increasing next time-read to 2-4-6-..-60 sec.
+                if (mainChip.globalState < 63) mainChip.globalState += 2;  // The whole chip in error mode, because the Bus could not be opened. Increasing next time-read to 2-4-6-..-60 sec.
                 err.discription = busStateTexts[_processState] + " failed.";
-                err.busNumber   = mainChipNode.busNum;
+                err.busNumber   = mainChip.busNum;
                 err.address     = _addr;
-                err.allStates = mainChipNode.allStates;
-                console.error(err.discription + "  [Bus="+ mainChipNode.busNum +"]  [Addr=" + _addr + "]   [mainChipNode.allStates=" + mainChipNode.allStates + "]");
-                mainChipNode.error(err);
-                mainChipNode.RW_finish();
+                err.allStates = mainChip.allStates;
+                console.error(err.discription + "  [Bus="+ mainChip.busNum +"]  [Addr=" + _addr + "]   [mainChipNode.allStates=" + mainChip.allStates + "]");
+                mainChip.error(err);
+                mainChip.RW_finish();
                 try {
                     // update ALL nodes, so they show "error"
-                    for (var i=0; i < mainChipNode.MaxBits; i++){ //(MaxBits= 8 or 16)
-                        if ( mainChipNode.ids[i] != null)  {
-                            const n = RED.nodes.getNode(mainChipNode.ids[i]);
+                    for (var i=0; i < mainChip.MaxBits; i++){ //(MaxBits= 8 or 16)
+                        if ( mainChip.ids[i] != null)  {
+                            const n = RED.nodes.getNode(mainChip.ids[i]);
                             if (n != null) { 
-                                showState(n, -2, mainChipNode.globalState);
+                                showState(n, -2, mainChip.globalState);
                                 //if (n.type == "MCP PCF In") n.changed(-2, true);
                             }
                         }
                     }
                     if ((_processState < 3) && !read1x)  { // if !read1x = called from debounce ... it should not restart
-                        mainChipNode.startChipTimer( mainChipNode.globalState * 1000 ); // re-try every 2-4-6-...60 sec.
+                        mainChip.startChipTimer( mainChip.globalState * 1000 ); // re-try every 2-4-6-...60 sec.
                     } 
                 }
                 catch (err){ 
@@ -503,16 +514,16 @@ module.exports = function(RED) {
                 return false;
             };
 
-            mainChipNode.RW_finish();
-            mainChipNode.lastTimeRed = performance.now(); //new Date().getTime();
-            mainChipNode.readLength  = mainChipNode.lastTimeRed - _readTime;
+            mainChip.RW_finish();
+            mainChip.lastTimeRed = performance.now(); //new Date().getTime();
+            mainChip.readLength  = mainChip.lastTimeRed - _readTime;
             if (! read1x) { // if "continuous read" is happening now
-                if (mainChipNode.interval < mainChipNode.readLength) {  // the time the reading took was too long. Increased the interval to double of that (ms).		
-                    mainChipNode.warn("  MCP/PCF Interval (" + mainChipNode.interval + "ms) is too short for input. Setting new time = " + (mainChipNode.readLength * 2).toString());
-                    mainChipNode.startChipTimer( Math.trunc(mainChipNode.readLength * 2)); // double the waiting period
+                if (mainChip.interval < mainChip.readLength) {  // the time the reading took was too long. Increased the interval to double of that (ms).		
+                    mainChip.warn("  MCP/PCF Interval (" + mainChip.interval + "ms) is too short for input. Setting new time = " + (mainChip.readLength * 2).toString());
+                    mainChip.startChipTimer( Math.trunc(mainChip.readLength * 2)); // double the waiting period
                 } else 
-                if ((mainChipNode.origInterv != mainChipNode.interval) && (mainChipNode.readLength < mainChipNode.origInterv)) {
-                    mainChipNode.startChipTimer( mainChipNode.origInterv ); // set back original interval
+                if ((mainChip.origInterv != mainChip.interval) && (mainChip.readLength < mainChip.origInterv)) {
+                    mainChip.startChipTimer( mainChip.origInterv ); // set back original interval
                 }
             }
 
@@ -522,10 +533,10 @@ module.exports = function(RED) {
 
         this.on('close', function() {  // stopping or deleting the Main-Chip-config
             try {
-                if (mainChipNode.chipTimer) {
+                if (mainChip.chipTimer) {
                     if (log2consol) console.log("  MCP/PCF Closing ... Clearing myTimer.");
-                    clearInterval(mainChipNode.chipTimer);
-                    mainChipNode.chipTimer = null; 
+                    clearInterval(mainChip.chipTimer);
+                    mainChip.chipTimer = null; 
                 }
                 
             }

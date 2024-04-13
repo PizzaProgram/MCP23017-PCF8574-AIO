@@ -5,10 +5,12 @@
 	RED.nodes.registerType('mcp_pcf_chip', {
 		category: 'config',
 		defaults: {
-			busNum: { value: 1, required: true, validate: RED.validators.number() },
-			addr: { value: "0x20", required: true },
+			busNum:   { value: 1, required: true, validate: RED.validators.number() },
+			addr:     { value: "0x20", required: true },
 			interval: { value: 100, required: true, validate: RED.validators.number() },
-			startAllHIGH: { value: false, required: true } // initialising the chip with all pins at HIGH state.
+			startAllHIGH: { value: false, required: true  }, // initialising the chip with all pins at HIGH state.
+			log2consol:   { value: true , required: false },
+			logTimer:     { value: false, required: false }
 		},
 		label: function () {
 			const _txt = "I2C-bus=" + this.busNum + " , Addr=";
@@ -62,8 +64,16 @@
 		<input type="number" id="node-config-input-interval" min=0>
 	</div>
 	<div class="form-row">
-		<label for="node-config-input-startAllHIGH"><i class="icon-bookmark"></i> Start All Outputs High</label>
-		<input type="checkbox" id="node-config-input-startAllHIGH" placeholder="Start All Outputs High">
+		<label for="node-config-input-startAllHIGH"><i class="icon-bookmark"></i>Start All Outputs High</label>
+		<input type="checkbox" id="node-config-input-startAllHIGH">
+	</div>
+	<div class="form-row">
+		<label for="node-config-input-log2consol"><i class="icon-bookmark"></i>Log to consol</label>
+		<input type="checkbox" id="node-config-input-log2consol">
+	</div>
+	<div class="form-row">
+		<label for="node-config-input-logTimer"><i class="icon-bookmark"></i>Timer Logs (+1k lines!)</label>
+		<input type="checkbox" id="node-config-input-logTimer">
 	</div>
 </script>
 
